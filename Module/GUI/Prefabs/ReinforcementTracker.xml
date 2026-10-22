@@ -1,0 +1,119 @@
+<Prefab>
+  <Window>
+    <!-- Shown while the battle scoreboard (Tab) is open. Two panels sit in the free space beside the scoreboard:
+         your side on the left, the enemy on the right. Nothing here accepts mouse input. -->
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" DoNotAcceptEvents="true" DoNotPassEventsToChildren="true" IsVisible="@IsVisible">
+      <Children>
+
+        <!-- ===================== Your side (left) ===================== -->
+        <Widget DataSource="{PlayerSide}" WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="270" HorizontalAlignment="Left" VerticalAlignment="Top" MarginLeft="12" MarginTop="190" Sprite="BlankWhiteSquare_9" Color="#000000B4">
+          <Children>
+            <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginLeft="10" MarginRight="10" MarginTop="8" MarginBottom="10" StackLayout.LayoutMethod="VerticalTopToBottom">
+              <Children>
+                <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="32" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="24" Brush.FontColor="#8FD16EFF" Brush.TextHorizontalAlignment="Center" Brush.TextVerticalAlignment="Center" Text="@Title" />
+                <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="2" MarginTop="2" MarginBottom="6" Sprite="BlankWhiteSquare_9" Color="#8FD16E80" />
+
+                <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@HasSpawnData">
+                  <Children>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="28" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="20" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@TotalLabel" />
+                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="28" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="22" Brush.FontColor="#F4E1C4FF" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@Total" />
+                  </Children>
+                </ListPanel>
+                <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@HasSpawnData">
+                  <Children>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="24" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="17" Brush.TextAlphaFactor="0.7" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@StartingLabel" />
+                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="24" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="17" Brush.TextAlphaFactor="0.7" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@Starting" />
+                  </Children>
+                </ListPanel>
+                <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight">
+                  <Children>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="19" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@OnFieldLabel" />
+                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="20" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@OnField" />
+                  </Children>
+                </ListPanel>
+                <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@HasSpawnData">
+                  <Children>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="19" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@ReservesLabel" />
+                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="20" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@Reserves" />
+                  </Children>
+                </ListPanel>
+                <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@HasSpawnData">
+                  <Children>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="19" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@NextWaveLabel" />
+                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="20" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@NextWave" />
+                  </Children>
+                </ListPanel>
+                <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@ShowWavesLeft">
+                  <Children>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="19" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@WavesLeftLabel" />
+                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="20" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@WavesLeft" />
+                  </Children>
+                </ListPanel>
+
+                <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="1" MarginTop="6" MarginBottom="6" Sprite="BlankWhiteSquare_9" Color="#FFFFFF40" />
+                <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="18" Brush.FontColor="#F4E1C4FF" Brush.TextHorizontalAlignment="Center" Text="@Status" />
+              </Children>
+            </ListPanel>
+          </Children>
+        </Widget>
+
+        <!-- ===================== Enemy (right) ===================== -->
+        <Widget IsVisible="@ShowEnemy" WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="270" HorizontalAlignment="Right" VerticalAlignment="Top" MarginRight="12" MarginTop="190">
+          <Children>
+            <Widget DataSource="{EnemySide}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Sprite="BlankWhiteSquare_9" Color="#000000B4">
+              <Children>
+                <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginLeft="10" MarginRight="10" MarginTop="8" MarginBottom="10" StackLayout.LayoutMethod="VerticalTopToBottom">
+                  <Children>
+                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="32" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="24" Brush.FontColor="#E0705CFF" Brush.TextHorizontalAlignment="Center" Brush.TextVerticalAlignment="Center" Text="@Title" />
+                    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="2" MarginTop="2" MarginBottom="6" Sprite="BlankWhiteSquare_9" Color="#E0705C80" />
+
+                    <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@HasSpawnData">
+                      <Children>
+                        <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="28" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="20" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@TotalLabel" />
+                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="28" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="22" Brush.FontColor="#F4E1C4FF" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@Total" />
+                      </Children>
+                    </ListPanel>
+                    <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@HasSpawnData">
+                      <Children>
+                        <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="24" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="17" Brush.TextAlphaFactor="0.7" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@StartingLabel" />
+                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="24" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="17" Brush.TextAlphaFactor="0.7" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@Starting" />
+                      </Children>
+                    </ListPanel>
+                    <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight">
+                      <Children>
+                        <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="19" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@OnFieldLabel" />
+                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="20" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@OnField" />
+                      </Children>
+                    </ListPanel>
+                    <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@HasSpawnData">
+                      <Children>
+                        <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="19" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@ReservesLabel" />
+                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="20" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@Reserves" />
+                      </Children>
+                    </ListPanel>
+                    <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@HasSpawnData">
+                      <Children>
+                        <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="19" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@NextWaveLabel" />
+                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="20" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@NextWave" />
+                      </Children>
+                    </ListPanel>
+                    <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@ShowWavesLeft">
+                      <Children>
+                        <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="165" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="19" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@WavesLeftLabel" />
+                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="26" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="20" Brush.TextHorizontalAlignment="Right" Brush.TextVerticalAlignment="Center" Text="@WavesLeft" />
+                      </Children>
+                    </ListPanel>
+
+                    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="1" MarginTop="6" MarginBottom="6" Sprite="BlankWhiteSquare_9" Color="#FFFFFF40" />
+                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="18" Brush.FontColor="#F4E1C4FF" Brush.TextHorizontalAlignment="Center" Text="@Status" />
+                  </Children>
+                </ListPanel>
+              </Children>
+            </Widget>
+          </Children>
+        </Widget>
+
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>
