@@ -10,7 +10,7 @@ namespace ReinforcementTracker
 {
     /// <summary>
     /// Hideout assaults don't use the normal battle spawn logic, so their second stage is read from the hideout
-    /// controllers instead (SandBox, game v1.4.8, read from the IL):
+    /// controllers instead (SandBox, game v1.5.7, read from the IL):
     ///
     /// Classic assault (HideoutMissionController):
     ///  - Only some bandits spawn at first. Once every bandit on the field is down, the game waits 4 s, plays the
@@ -84,32 +84,32 @@ namespace ReinforcementTracker
 
         public SideForecast Compute(Mission mission, BattleSideEnum side, bool isPlayerSide)
         {
-            var f = new SideForecast { Side = side, Kind = HideoutKind };
-            f.OnField = BattleSides.CountActiveHumans(mission, side);
+            var forecast = new SideForecast { Side = side, Kind = HideoutKind };
+            forecast.OnField = BattleSides.CountActiveHumans(mission, side);
             if (!ReflectionOk)
             {
-                f.Kind = ForecastKind.LiveCountOnly;
-                f.Status = WaveStatus.NoSpawnLogic;
-                f.Starting = f.OnField;
-                return f;
+                forecast.Kind = ForecastKind.LiveCountOnly;
+                forecast.Status = WaveStatus.NoSpawnLogic;
+                forecast.Starting = forecast.OnField;
+                return forecast;
             }
 
-            if (_classic != null) ComputeClassic(f, isPlayerSide);
-            else ComputeStealth(f, isPlayerSide);
+            if (_classic != null) ComputeClassic(forecast, isPlayerSide);
+            else ComputeStealth(forecast, isPlayerSide);
 
             // Hideouts don't report a starting strength, so use the largest total seen so far.
-            if (isPlayerSide) f.Starting = _playerMaxTotal = Math.Max(_playerMaxTotal, f.Total);
-            else f.Starting = _banditMaxTotal = Math.Max(_banditMaxTotal, f.Total);
-            return f;
+            if (isPlayerSide) forecast.Starting = _playerMaxTotal = Math.Max(_playerMaxTotal, forecast.Total);
+            else forecast.Starting = _banditMaxTotal = Math.Max(_banditMaxTotal, forecast.Total);
+            return forecast;
         }
 
-        private void ComputeClassic(SideForecast f, bool isPlayerSide)
+        private void ComputeClassic(SideForecast forecast, bool isPlayerSide)
         {
             int state = ToInt(ClassicState.GetValue(_classic));
             if (isPlayerSide)
             {
                 // Only the troops you picked fight; the rest of your party never joins a hideout fight.
-                f.Status = state == ClassicNotDecided ? WaveStatus.Deploying : WaveStatus.NoReinforcements;
+                forecast.Status = state == ClassicNotDecided ? WaveStatus.Deploying : WaveStatus.NoReinforcements;
                 return;
             }
 
@@ -123,17 +123,17 @@ namespace ReinforcementTracker
                     waiting += Math.Max(0, (int)SideNotSupplied.GetValue(s));
                 }
             }
-            f.Reserves = waiting;
-            f.NextWave = waiting;
-            f.WavesLeft = waiting > 0 ? 1 : 0;
+            forecast.Reserves = waiting;
+            forecast.NextWave = waiting;
+            forecast.WavesLeft = waiting > 0 ? 1 : 0;
 
-            if (state == ClassicNotDecided) f.Status = WaveStatus.Deploying;
-            else if (waiting <= 0) f.Status = WaveStatus.NoneLeft;
-            else if (state == ClassicCutScene || state == ClassicConversation) f.Status = WaveStatus.Arriving;
-            else SetFirstPhaseCountdown(f);
+            if (state == ClassicNotDecided) forecast.Status = WaveStatus.Deploying;
+            else if (waiting <= 0) forecast.Status = WaveStatus.NoneLeft;
+            else if (state == ClassicCutScene || state == ClassicConversation) forecast.Status = WaveStatus.Arriving;
+            else SetFirstPhaseCountdown(forecast);
         }
 
-        private void ComputeStealth(SideForecast f, bool isPlayerSide)
+        private void ComputeStealth(SideForecast forecast, bool isPlayerSide)
         {
             int state = ToInt(AmbushState.GetValue(_ambush));
             if (isPlayerSide)
@@ -141,9 +141,9 @@ namespace ReinforcementTracker
                 int selected = (AmbushPlayerTroops?.GetValue(_ambush) as ICollection)?.Count ?? 0;
                 int arrived = _stealthAreas?.AllyTroops?.Count ?? 0;
                 int waiting = Math.Max(0, selected - arrived);
-                f.Reserves = waiting;
-                f.NextWave = waiting;
-                f.Status = state == StealthNotDecided ? WaveStatus.Deploying
+                forecast.Reserves = waiting;
+                forecast.NextWave = waiting;
+                forecast.Status = state == StealthNotDecided ? WaveStatus.Deploying
                     : waiting > 0 ? WaveStatus.CallTroops
                     : WaveStatus.NoneLeft;
                 return;
@@ -158,23 +158,23 @@ namespace ReinforcementTracker
                 int minimum = (int)Math.Max(4f, Math.Min(20f, (float)(population / 2)));
                 waitingBandits = Math.Max(pool, minimum) + (AmbushBossOrigin?.GetValue(_ambush) != null ? 1 : 0);
             }
-            f.Reserves = waitingBandits;
-            f.NextWave = waitingBandits;
-            f.WavesLeft = waitingBandits > 0 ? 1 : 0;
+            forecast.Reserves = waitingBandits;
+            forecast.NextWave = waitingBandits;
+            forecast.WavesLeft = waitingBandits > 0 ? 1 : 0;
 
-            if (state == StealthNotDecided) f.Status = WaveStatus.Deploying;
-            else if (waitingBandits <= 0) f.Status = WaveStatus.NoneLeft;
-            else if (state == StealthCutScene || state == StealthConversation) f.Status = WaveStatus.Arriving;
-            else SetFirstPhaseCountdown(f); // stealth phase, call-troops cutscene or the fight before the boss
+            if (state == StealthNotDecided) forecast.Status = WaveStatus.Deploying;
+            else if (waitingBandits <= 0) forecast.Status = WaveStatus.NoneLeft;
+            else if (state == StealthCutScene || state == StealthConversation) forecast.Status = WaveStatus.Arriving;
+            else SetFirstPhaseCountdown(forecast); // stealth phase, call-troops cutscene or the fight before the boss
         }
 
         /// <summary>The second stage needs every bandit on the field down.</summary>
-        private void SetFirstPhaseCountdown(SideForecast f)
+        private void SetFirstPhaseCountdown(SideForecast forecast)
         {
-            _firstPhaseMaxOnField = Math.Max(_firstPhaseMaxOnField, f.OnField);
-            f.WaveSize = _firstPhaseMaxOnField;
-            f.CasualtiesNeeded = f.OnField;
-            f.Status = f.OnField > 0 ? WaveStatus.NeedsCasualties : WaveStatus.Arriving;
+            _firstPhaseMaxOnField = Math.Max(_firstPhaseMaxOnField, forecast.OnField);
+            forecast.WaveSize = _firstPhaseMaxOnField;
+            forecast.CasualtiesNeeded = forecast.OnField;
+            forecast.Status = forecast.OnField > 0 ? WaveStatus.NeedsCasualties : WaveStatus.Arriving;
         }
 
         private static int ToInt(object enumValue) => enumValue == null ? -1 : Convert.ToInt32(enumValue);

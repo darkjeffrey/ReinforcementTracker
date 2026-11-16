@@ -10,14 +10,14 @@
     <!-- src/Log.cs -->
     <string id="rt_err_generic" text="[ReinforcementTracker] error ({WHERE}): {ERROR}" />
 
-    <!-- src/ReinforcementTrackerMcmSettings.cs -->
-    <string id="rt_mcm_title" text="Reinforcement Tracker" />
+    <!-- src/McmPage.cs -->
     <string id="rt_mcm_group_general" text="General" />
+    <string id="rt_mcm_group_alerts" text="Alerts" />
+    <string id="rt_mcm_group_testing" text="Testing" />
     <string id="rt_mcm_Enabled" text="Enable" />
     <string id="rt_mcm_Enabled_hint" text="While the battle scoreboard (Tab) is open, show each side's total troops including reinforcements still to come, the size of the next wave and how many more casualties it takes before it arrives. Turning this off also turns off the alerts." />
     <string id="rt_mcm_ShowEnemy" text="Show the enemy panel" />
     <string id="rt_mcm_ShowEnemy_hint" text="Off: only your own side is shown, if you'd rather not know how many enemies are still coming." />
-    <string id="rt_mcm_group_alerts" text="Alerts" />
     <string id="rt_mcm_AlertProgress" text="Alert on the way to reinforcements" />
     <string id="rt_mcm_AlertProgress_hint" text="Show a message once per wave when a side has taken enough casualties to be partway to its next reinforcements, for example &quot;Enemies are halfway to getting reinforcements&quot;." />
     <string id="rt_mcm_AlertProgressPercent" text="Alert at" />
@@ -30,9 +30,9 @@
     <string id="rt_mcm_AlertsForEnemy_hint" text="Show the alerts for the enemy side." />
     <string id="rt_mcm_AlertsAsBanner" text="Show alerts as a banner" />
     <string id="rt_mcm_AlertsAsBanner_hint" text="Off: alerts appear as coloured lines in the chat log (green for your side, red for the enemy). On: they appear as the large notification at the top of the screen." />
-    <string id="rt_mcm_group_testing" text="Testing" />
     <string id="rt_mcm_DebugMessages" text="Debug messages" />
     <string id="rt_mcm_DebugMessages_hint" text="Show the raw numbers in the chat log each time you open the scoreboard, and a message each time a reinforcement wave arrives with the size that was predicted. Useful for checking the mod; turn it off for normal play." />
+    <string id="rt_mcm_title" text="Reinforcement Tracker" />
 
     <!-- src/ReinforcementTrackerVM.cs -->
     <string id="rt_title_player" text="Your side" />

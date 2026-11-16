@@ -6,11 +6,11 @@ namespace ReinforcementTracker
     public enum ForecastKind
     {
         LiveCountOnly,  // no reinforcement data: only the troops on the field are counted
-        Wave,           // campaign field battles and sieges
-        Balanced,       // custom battles
-        Fixed,
-        ClassicHideout,
-        StealthHideout,
+        Wave,           // campaign and custom field battles and sieges
+        Balanced,       // the game's default spawn settings (missions that don't set their own)
+        Fixed,          // sally-outs: fixed-size batches on their own timer
+        ClassicHideout, // the boss and the rest of the bandits come once the first group is down
+        StealthHideout, // sentries first; your troops come in at signal points
     }
 
     /// <summary>What the panel says about the next wave.</summary>

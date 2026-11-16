@@ -3,30 +3,25 @@ using System;
 namespace ReinforcementTracker
 {
     /// <summary>
-    /// Read-only view of the current settings. Values come from the MCM page (ReinforcementTrackerMcmSettings);
-    /// the defaults there are used if MCM isn't loaded yet.
+    /// The current settings. These are the defaults; when Mod Configuration Menu is installed, its page
+    /// (McmPage) loads the saved values into these properties and writes every change back here.
     /// </summary>
     public static class RtSettings
     {
-        private static readonly ReinforcementTrackerMcmSettings Defaults = new ReinforcementTrackerMcmSettings();
+        private static int _alertProgressPercent = 50;
 
-        private static ReinforcementTrackerMcmSettings S
+        public static bool Enabled { get; set; } = true;
+        public static bool ShowEnemy { get; set; } = true;
+        public static bool AlertProgress { get; set; } = true;
+        public static int AlertProgressPercent
         {
-            get
-            {
-                try { return ReinforcementTrackerMcmSettings.Instance ?? Defaults; }
-                catch (Exception) { return Defaults; }
-            }
+            get => _alertProgressPercent;
+            set => _alertProgressPercent = Math.Max(10, Math.Min(90, value));
         }
-
-        public static bool Enabled => S.Enabled;
-        public static bool ShowEnemy => S.ShowEnemy;
-        public static bool AlertProgress => S.AlertProgress;
-        public static int AlertProgressPercent => Math.Max(10, Math.Min(90, S.AlertProgressPercent));
-        public static bool AlertArrival => S.AlertArrival;
-        public static bool AlertsForYourSide => S.AlertsForYourSide;
-        public static bool AlertsForEnemy => S.AlertsForEnemy;
-        public static bool AlertsAsBanner => S.AlertsAsBanner;
-        public static bool DebugMessages => S.DebugMessages;
+        public static bool AlertArrival { get; set; } = true;
+        public static bool AlertsForYourSide { get; set; } = true;
+        public static bool AlertsForEnemy { get; set; } = true;
+        public static bool AlertsAsBanner { get; set; } = false;
+        public static bool DebugMessages { get; set; } = false;
     }
 }

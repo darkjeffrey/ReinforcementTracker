@@ -89,22 +89,22 @@ namespace ReinforcementTracker
             set => ViewModelFields.Set(this, ref _showWavesLeft, value, nameof(ShowWavesLeft));
         }
 
-        public void Update(SideForecast f)
+        public void Update(SideForecast forecast)
         {
-            HasSpawnData = f.HasReinforcementData;
-            OnField = f.OnField.ToString();
-            Total = f.Total.ToString();
-            Starting = f.Starting.ToString();
-            Reserves = f.Reserves.ToString();
-            NextWave = f.Status == WaveStatus.NoneLeft || f.Status == WaveStatus.NoReinforcements ? "-" : f.NextWave.ToString();
-            ShowWavesLeft = f.HasReinforcementData && f.WavesLeft >= 0;
-            WavesLeft = f.WavesLeft.ToString();
-            Status = StatusText(f);
+            HasSpawnData = forecast.HasReinforcementData;
+            OnField = forecast.OnField.ToString();
+            Total = forecast.Total.ToString();
+            Starting = forecast.Starting.ToString();
+            Reserves = forecast.Reserves.ToString();
+            NextWave = forecast.Status == WaveStatus.NoneLeft || forecast.Status == WaveStatus.NoReinforcements ? "-" : forecast.NextWave.ToString();
+            ShowWavesLeft = forecast.HasReinforcementData && forecast.WavesLeft >= 0;
+            WavesLeft = forecast.WavesLeft.ToString();
+            Status = StatusText(forecast);
         }
 
-        private static string StatusText(SideForecast f)
+        private static string StatusText(SideForecast forecast)
         {
-            switch (f.Status)
+            switch (forecast.Status)
             {
                 case WaveStatus.NoSpawnLogic:
                     return new TextObject("{=rt_st_nodata}No reinforcement data in this fight").ToString();
@@ -115,7 +115,7 @@ namespace ReinforcementTracker
                 case WaveStatus.Paused:
                     return new TextObject("{=rt_st_paused}Reinforcements are paused").ToString();
                 case WaveStatus.Arriving:
-                    if (f.IsHideout)
+                    if (forecast.IsHideout)
                         return new TextObject("{=rt_st_stage2_now}The second stage is starting").ToString();
                     return new TextObject("{=rt_st_arriving}Reinforcements arriving now").ToString();
                 case WaveStatus.WaitingForSpace:
@@ -125,22 +125,22 @@ namespace ReinforcementTracker
                 case WaveStatus.CallTroops:
                     return new TextObject("{=rt_st_call}Your troops come in when you use a signal point").ToString();
                 case WaveStatus.NeedsCasualties:
-                    if (f.IsHideout)
+                    if (forecast.IsHideout)
                     {
-                        if (f.CasualtiesNeeded == 1)
+                        if (forecast.CasualtiesNeeded == 1)
                             return new TextObject("{=rt_st_stage2_one}Second stage after 1 more casualty").ToString();
                         return new TextObject("{=rt_st_stage2_more}Second stage after {COUNT} more casualties")
-                            .SetTextVariable("COUNT", f.CasualtiesNeeded).ToString();
+                            .SetTextVariable("COUNT", forecast.CasualtiesNeeded).ToString();
                     }
-                    if (f.CasualtiesNeeded == 1)
+                    if (forecast.CasualtiesNeeded == 1)
                         return new TextObject("{=rt_st_one_more}Next wave after 1 more casualty").ToString();
                     return new TextObject("{=rt_st_more}Next wave after {COUNT} more casualties")
-                        .SetTextVariable("COUNT", f.CasualtiesNeeded).ToString();
+                        .SetTextVariable("COUNT", forecast.CasualtiesNeeded).ToString();
                 default: // NextCheck
-                    if (f.SecondsToCheck < 0f)
+                    if (forecast.SecondsToCheck < 0f)
                         return new TextObject("{=rt_st_nextcheck}Next wave at the next reinforcement check").ToString();
                     return new TextObject("{=rt_st_seconds}Next wave in {SECONDS}s")
-                        .SetTextVariable("SECONDS", Math.Max(1, (int)Math.Ceiling(f.SecondsToCheck))).ToString();
+                        .SetTextVariable("SECONDS", Math.Max(1, (int)Math.Ceiling(forecast.SecondsToCheck))).ToString();
             }
         }
     }

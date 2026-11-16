@@ -163,12 +163,12 @@ namespace ReinforcementTracker
         private void LogForecasts()
         {
             if (!RtSettings.DebugMessages) return;
-            foreach (SideForecast f in new[] { _lastPlayer, _lastEnemy })
+            foreach (SideForecast forecast in new[] { _lastPlayer, _lastEnemy })
             {
-                Log.Debug($"{(f == _lastPlayer ? "You" : "Enemy")} ({f.Side}, {f.Kind}): field {f.OnField}, " +
-                          $"to come {f.Reserves} (queued {f.Queued}), start {f.Starting}, initial {f.InitialSpawned}, " +
-                          $"wave size {f.WaveSize}, next {f.NextWave}, needs {f.CasualtiesNeeded}, " +
-                          $"check in {f.SecondsToCheck:0.0}s, {f.Status}");
+                Log.Debug($"{(forecast == _lastPlayer ? "You" : "Enemy")} ({forecast.Side}, {forecast.Kind}): field {forecast.OnField}, " +
+                          $"to come {forecast.Reserves} (queued {forecast.Queued}), start {forecast.Starting}, initial {forecast.InitialSpawned}, " +
+                          $"wave size {forecast.WaveSize}, next {forecast.NextWave}, needs {forecast.CasualtiesNeeded}, " +
+                          $"check in {forecast.SecondsToCheck:0.0}s, {forecast.Status}");
             }
         }
 

@@ -6,16 +6,19 @@ using TaleWorlds.MountAndBlade;
 namespace ReinforcementTracker
 {
     /// <summary>
-    /// Predicts reinforcements by re-applying the rules of DefaultBattleMissionAgentSpawnLogic (game v1.4.8,
+    /// Predicts reinforcements by re-applying the rules of DefaultBattleMissionAgentSpawnLogic (game v1.5.7,
     /// read from its IL). Read-only: nothing in the game is changed.
     ///
-    /// Every GlobalReinforcementInterval seconds (3 s in campaign battles, 10 s by default) each side works out a batch:
-    ///  - Wave (campaign field battles and sieges): only when nothing is queued and the side has lost at least
-    ///    waveSize = max(1, InitialSpawned * ReinforcementWavePercentage) troops; then min(waveSize, Remaining)
-    ///    troops are queued. The game's wave-count option already trimmed Remaining at the start.
-    ///  - Balanced (custom battles): min(desired, InitialSpawned - active, Remaining), released once at least
-    ///    batchSize = BattleSize * ReinforcementBatchPercentage troops are queued (or fewer are left).
-    ///  - Fixed: max(1, TotalSpawnNumber * side %) troops every check.
+    /// Every GlobalReinforcementInterval seconds (3 s in campaign and custom battles, 10 s by default) each side
+    /// works out a batch:
+    ///  - Wave (campaign and custom field battles and sieges): only when nothing is queued and the side has lost at
+    ///    least waveSize = max(1, InitialSpawned * ReinforcementWavePercentage) troops; then min(waveSize, Remaining)
+    ///    troops are queued. In the campaign the game's wave-count option already trimmed Remaining at the start;
+    ///    custom battles have no wave limit.
+    ///  - Balanced (the default settings, used by missions that don't set their own): min(desired,
+    ///    InitialSpawned - active, Remaining), released once at least batchSize = BattleSize *
+    ///    ReinforcementBatchPercentage troops are queued (or fewer are left).
+    ///  - Fixed (sally-outs, on a custom timer): max(1, TotalSpawnNumber * side %) troops every check.
     /// Queued troops spawn one per tick while the engine has room for both sides' queued agents.
     /// </summary>
     public static class ReinforcementForecast
@@ -32,7 +35,7 @@ namespace ReinforcementTracker
 
         public static SideForecast Compute(Mission mission, DefaultBattleMissionAgentSpawnLogic logic, BattleSideEnum side)
         {
-            var f = new SideForecast { Side = side };
+            var forecast = new SideForecast { Side = side };
 
             MissionBattleSideSpawnContext[] contexts = logic != null && ReflectionOk
                 ? ContextsField.GetValue(logic) as MissionBattleSideSpawnContext[]
@@ -44,107 +47,107 @@ namespace ReinforcementTracker
 
             if (phase == null || context == null)
             {
-                f.Kind = ForecastKind.LiveCountOnly;
-                f.Status = WaveStatus.NoSpawnLogic;
-                f.OnField = f.Starting = BattleSides.CountActiveHumans(mission, side);
-                return f;
+                forecast.Kind = ForecastKind.LiveCountOnly;
+                forecast.Status = WaveStatus.NoSpawnLogic;
+                forecast.OnField = forecast.Starting = BattleSides.CountActiveHumans(mission, side);
+                return forecast;
             }
 
-            f.Starting = logic.GetTotalNumberOfTroopsForSide(side);
-            f.OnField = Math.Max(0, context.NumberOfActiveTroops);
-            f.Reserves = Math.Max(0, phase.RemainingSpawnNumber);
-            f.Queued = context.ReservedTroopsCount;
-            f.InitialSpawned = phase.InitialSpawnedNumber;
+            forecast.Starting = logic.GetTotalNumberOfTroopsForSide(side);
+            forecast.OnField = Math.Max(0, context.NumberOfActiveTroops);
+            forecast.Reserves = Math.Max(0, phase.RemainingSpawnNumber);
+            forecast.Queued = context.ReservedTroopsCount;
+            forecast.InitialSpawned = phase.InitialSpawnedNumber;
 
             MissionSpawnSettings settings = logic.SpawnSettings;
             bool customTimer = settings.ReinforcementTroopsTimingMethod == MissionSpawnSettings.ReinforcementTimingMethod.CustomTimer;
             if (!customTimer && TimerField?.GetValue(logic) is BasicMissionTimer timer)
-                f.SecondsToCheck = Math.Max(0f, logic.GetReinforcementInterval() - timer.ElapsedTime);
+                forecast.SecondsToCheck = Math.Max(0f, logic.GetReinforcementInterval() - timer.ElapsedTime);
 
             switch (settings.ReinforcementTroopsSpawnMethod)
             {
                 case MissionSpawnSettings.ReinforcementSpawnMethod.Wave:
-                    ForecastWave(f, settings);
+                    ForecastWave(forecast, settings);
                     break;
                 case MissionSpawnSettings.ReinforcementSpawnMethod.Fixed:
-                    ForecastFixed(f, settings, logic);
+                    ForecastFixed(forecast, settings, logic);
                     break;
                 default:
-                    ForecastBalanced(f, settings, logic, phase);
+                    ForecastBalanced(forecast, settings, logic, phase);
                     break;
             }
 
-            f.Status = GetStatus(f, logic, context, contexts);
-            if (f.Status == WaveStatus.NoneLeft)
+            forecast.Status = GetStatus(forecast, logic, context, contexts);
+            if (forecast.Status == WaveStatus.NoneLeft)
             {
-                f.NextWave = 0;
-                f.CasualtiesNeeded = 0;
-                f.WavesLeft = 0;
+                forecast.NextWave = 0;
+                forecast.CasualtiesNeeded = 0;
+                forecast.WavesLeft = 0;
             }
-            return f;
+            return forecast;
         }
 
-        private static void ForecastWave(SideForecast f, MissionSpawnSettings settings)
+        private static void ForecastWave(SideForecast forecast, MissionSpawnSettings settings)
         {
-            f.Kind = ForecastKind.Wave;
-            f.WaveSize = (int)Math.Max(1f, f.InitialSpawned * settings.ReinforcementWavePercentage);
-            if (f.Queued > 0)
+            forecast.Kind = ForecastKind.Wave;
+            forecast.WaveSize = (int)Math.Max(1f, forecast.InitialSpawned * settings.ReinforcementWavePercentage);
+            if (forecast.Queued > 0)
             {
-                f.NextWave = f.Queued;
+                forecast.NextWave = forecast.Queued;
             }
             else
             {
                 // Even the last, smaller wave needs the full loss before it's called.
-                int lost = f.InitialSpawned - f.OnField;
-                f.NextWave = Math.Min(f.WaveSize, f.Reserves);
-                f.CasualtiesNeeded = Math.Max(0, f.WaveSize - lost);
+                int lost = forecast.InitialSpawned - forecast.OnField;
+                forecast.NextWave = Math.Min(forecast.WaveSize, forecast.Reserves);
+                forecast.CasualtiesNeeded = Math.Max(0, forecast.WaveSize - lost);
             }
-            f.WavesLeft = (f.Reserves + f.WaveSize - 1) / f.WaveSize;
+            forecast.WavesLeft = (forecast.Reserves + forecast.WaveSize - 1) / forecast.WaveSize;
         }
 
-        private static void ForecastFixed(SideForecast f, MissionSpawnSettings settings, DefaultBattleMissionAgentSpawnLogic logic)
+        private static void ForecastFixed(SideForecast forecast, MissionSpawnSettings settings, DefaultBattleMissionAgentSpawnLogic logic)
         {
-            f.Kind = ForecastKind.Fixed;
-            float share = f.Side == BattleSideEnum.Attacker
+            forecast.Kind = ForecastKind.Fixed;
+            float share = forecast.Side == BattleSideEnum.Attacker
                 ? settings.AttackerReinforcementBatchPercentage
                 : settings.DefenderReinforcementBatchPercentage;
-            f.WaveSize = Math.Max(1, (int)(logic.TotalSpawnNumber * share));
-            f.NextWave = Math.Max(f.Queued, Math.Min(f.WaveSize, f.Reserves));
-            f.WavesLeft = (f.Reserves + f.WaveSize - 1) / f.WaveSize;
+            forecast.WaveSize = Math.Max(1, (int)(logic.TotalSpawnNumber * share));
+            forecast.NextWave = Math.Max(forecast.Queued, Math.Min(forecast.WaveSize, forecast.Reserves));
+            forecast.WavesLeft = (forecast.Reserves + forecast.WaveSize - 1) / forecast.WaveSize;
         }
 
-        private static void ForecastBalanced(SideForecast f, MissionSpawnSettings settings,
+        private static void ForecastBalanced(SideForecast forecast, MissionSpawnSettings settings,
             DefaultBattleMissionAgentSpawnLogic logic, MissionSpawnPhase phase)
         {
-            f.Kind = ForecastKind.Balanced;
-            f.WaveSize = (int)(logic.BattleSize * settings.ReinforcementBatchPercentage);
+            forecast.Kind = ForecastKind.Balanced;
+            forecast.WaveSize = (int)(logic.BattleSize * settings.ReinforcementBatchPercentage);
 
-            int freeSlots = f.InitialSpawned - f.OnField;
-            int desired = Math.Max(1, f.Queued + (int)((phase.TotalSpawnNumber - f.InitialSpawned) * settings.DesiredReinforcementPercentage));
+            int freeSlots = forecast.InitialSpawned - forecast.OnField;
+            int desired = Math.Max(1, forecast.Queued + (int)((phase.TotalSpawnNumber - forecast.InitialSpawned) * settings.DesiredReinforcementPercentage));
             int canQueue = Math.Min(desired, freeSlots);
-            int queuedAfterCheck = Math.Max(f.Queued, Math.Min(canQueue, f.Reserves));
+            int queuedAfterCheck = Math.Max(forecast.Queued, Math.Min(canQueue, forecast.Reserves));
 
-            bool released = queuedAfterCheck > 0 && (queuedAfterCheck >= f.WaveSize || f.Reserves <= f.WaveSize);
+            bool released = queuedAfterCheck > 0 && (queuedAfterCheck >= forecast.WaveSize || forecast.Reserves <= forecast.WaveSize);
             if (released)
             {
-                f.NextWave = queuedAfterCheck;
+                forecast.NextWave = queuedAfterCheck;
                 return;
             }
-            int threshold = f.Reserves <= f.WaveSize ? 1 : f.WaveSize;
-            f.NextWave = Math.Min(Math.Max(1, threshold), f.Reserves);
-            f.CasualtiesNeeded = Math.Max(1, threshold - Math.Max(f.Queued, canQueue));
+            int threshold = forecast.Reserves <= forecast.WaveSize ? 1 : forecast.WaveSize;
+            forecast.NextWave = Math.Min(Math.Max(1, threshold), forecast.Reserves);
+            forecast.CasualtiesNeeded = Math.Max(1, threshold - Math.Max(forecast.Queued, canQueue));
         }
 
-        private static WaveStatus GetStatus(SideForecast f, DefaultBattleMissionAgentSpawnLogic logic,
+        private static WaveStatus GetStatus(SideForecast forecast, DefaultBattleMissionAgentSpawnLogic logic,
             MissionBattleSideSpawnContext context, MissionBattleSideSpawnContext[] contexts)
         {
             if (!logic.IsInitialSpawnOver) return WaveStatus.Deploying;
-            if (f.Reserves <= 0) return WaveStatus.NoneLeft;
+            if (forecast.Reserves <= 0) return WaveStatus.NoneLeft;
 
             bool enabled = !(EnabledField?.GetValue(logic) is bool e) || e;
             if (!enabled || !context.TroopSpawnActive) return WaveStatus.Paused;
 
-            if (f.Queued > 0)
+            if (forecast.Queued > 0)
             {
                 if (SpawningField?.GetValue(logic) is bool spawning && spawning) return WaveStatus.Arriving;
 
@@ -154,7 +157,7 @@ namespace ReinforcementTracker
                     if (c != null) needed += c.ReinforcementQuotaRequirement;
                 return room < needed ? WaveStatus.WaitingForSpace : WaveStatus.NextCheck;
             }
-            return f.CasualtiesNeeded > 0 ? WaveStatus.NeedsCasualties : WaveStatus.NextCheck;
+            return forecast.CasualtiesNeeded > 0 ? WaveStatus.NeedsCasualties : WaveStatus.NextCheck;
         }
     }
 }

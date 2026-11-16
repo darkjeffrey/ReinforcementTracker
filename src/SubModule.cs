@@ -7,6 +7,13 @@ namespace ReinforcementTracker
 {
     public class SubModule : MBSubModuleBase
     {
+        /// <summary>Runs when the main menu first shows; MCM (if installed) is ready by then.</summary>
+        protected override void OnBeforeInitialModuleScreenSetAsRoot()
+        {
+            base.OnBeforeInitialModuleScreenSetAsRoot();
+            McmPage.TryRegister();
+        }
+
         public override void OnMissionBehaviorInitialize(Mission mission)
         {
             base.OnMissionBehaviorInitialize(mission);

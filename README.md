@@ -1,6 +1,6 @@
 # Reinforcement Tracker
 
-A Mount & Blade II: Bannerlord mod (v1.4.8) that shows how big each army really is, reinforcements included, whenever you hold **Tab** for the battle scoreboard.
+A Mount & Blade II: Bannerlord mod (v1.5.7) that shows how big each army really is, reinforcements included, whenever you hold **Tab** for the battle scoreboard.
 
 The vanilla scoreboard only counts troops that have already spawned. With a battle size of 500 and two big armies, most of the fight is still waiting off the map. This mod adds a panel on each side of the scoreboard: your side on the left, the enemy on the right.
 
@@ -36,18 +36,21 @@ You don't have to keep checking the scoreboard. The mod can also tell you, in th
 - **When a side is partway to its next wave**, once per wave: "Enemies are halfway to getting reinforcements (50 more casualties)". The point is configurable (10% to 90%, default halfway).
 - **When reinforcements arrive**: "Enemy reinforcements have arrived: 100 troops".
 
-Alerts for your side are green and enemy alerts are red. Each side can be switched off separately. The "partway" alert only applies to battles with real waves, which covers campaign field battles and sieges. In custom battles, where troops trickle in, it only shows while a full batch is still to come.
+Alerts for your side are green and enemy alerts are red. Each side can be switched off separately. The "partway" alert only applies to battles with real waves, which covers campaign and custom field battles and sieges. In battles where troops trickle in instead, it only shows while a full batch is still to come.
 
 ## How the numbers are worked out
 
-The mod only reads the game's own reinforcement logic and never changes it. The rules below were read from the game code (v1.4.8):
+The mod only reads the game's own reinforcement logic and never changes it. The rules below were read from the game code (v1.5.7):
 
-- **Campaign field battles and sieges** use waves. Every 3 seconds the game checks each side. When a side has lost at least half of its starting strength on the field (50% of its initial spawn), a wave of that size is called, or whatever is left if that's fewer. Even the last small wave needs the full loss before it is called.
-- The game's **Reinforcement waves** option limits how many waves come at all. Troops beyond that limit don't take part in the battle, so they aren't counted here either.
-- **Custom battles** use the balanced method: troops trickle in as slots free up, released in batches (5% of the battle size with the default settings).
+- **Field battles and sieges**, both in the campaign and in custom battles, use waves. Every 3 seconds the game checks each side. When a side has lost at least half of its starting strength on the field (50% of its initial spawn), a wave of that size is called, or whatever is left if that's fewer. Even the last small wave needs the full loss before it is called.
+- In the campaign, the game's **Reinforcement waves** option limits how many waves come at all. Troops beyond that limit don't take part in the battle, so they aren't counted here either. Custom battles have no wave limit, so every troop in the army eventually comes in.
+- **Sally-outs** send fixed-size batches on their own timer.
+- Battles that keep the game's default spawn settings (some modded missions) use the balanced method: troops trickle in as slots free up, released in batches (5% of the battle size, checked every 10 seconds).
 - Reinforcements spawn one per frame once called, so a wave arrives over a second or two.
 
 ## Options (Mod Options, MCM)
+
+The options page needs Mod Configuration Menu (MCM). Without MCM the mod still works, using the defaults below.
 
 | Option | Default | What it does |
 |---|---|---|
@@ -63,7 +66,7 @@ The mod only reads the game's own reinforcement logic and never changes it. The 
 
 ## Requirements
 
-Bannerlord.Harmony, ButterLib, UIExtenderEx and Mod Configuration Menu v5. Load it after them.
+None. Mod Configuration Menu v5 (with Harmony, ButterLib and UIExtenderEx) is optional and only needed to change the options; if you use it, load Reinforcement Tracker after it.
 
 ## Building
 
@@ -80,7 +83,8 @@ From the `src` folder run `dotnet build -c Release`. The build copies the dll, `
 | `SideForecast.cs` | The per-side snapshot both forecasts produce. |
 | `TroopAlerts.cs` | The "halfway" and "arrived" messages. |
 | `ReinforcementTrackerVM.cs` and `Module/GUI/Prefabs/ReinforcementTracker.xml` | The two panels. |
-| `ReinforcementTrackerMcmSettings.cs`, `RtSettings.cs` | The Mod Options page and read access to it. |
+| `RtSettings.cs` | The current settings, with the defaults. |
+| `McmPage.cs` | The Mod Options page, built at runtime only when MCM is installed (no type derives from MCM, so the mod loads without it). |
 
 The game exposes most of what's needed, but a few values (the reinforcement timer, the hideout stage state) are private fields read by reflection. If a game update renames them, the panels fall back to counting the troops on the field, and Debug messages says which fields weren't found.
 

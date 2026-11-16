@@ -47,19 +47,19 @@ namespace ReinforcementTracker
             Show(text, isPlayer);
         }
 
-        private void CheckProgress(SideForecast f, int index)
+        private void CheckProgress(SideForecast forecast, int index)
         {
-            bool trackable = f.HasReinforcementData && f.WaveSize > 0 && f.Kind != ForecastKind.Fixed
-                             && !(f.Kind == ForecastKind.Balanced && f.Reserves <= f.WaveSize);
+            bool trackable = forecast.HasReinforcementData && forecast.WaveSize > 0 && forecast.Kind != ForecastKind.Fixed
+                             && !(forecast.Kind == ForecastKind.Balanced && forecast.Reserves <= forecast.WaveSize);
 
-            if (!trackable || f.Status != WaveStatus.NeedsCasualties)
+            if (!trackable || forecast.Status != WaveStatus.NeedsCasualties)
             {
                 // The wave is due, arriving, finished or not tracked: wait for the side to start a new count.
-                _progressArmed[index] = trackable && f.Status == WaveStatus.Deploying;
+                _progressArmed[index] = trackable && forecast.Status == WaveStatus.Deploying;
                 return;
             }
 
-            float progress = 1f - (float)f.CasualtiesNeeded / f.WaveSize;
+            float progress = 1f - (float)forecast.CasualtiesNeeded / forecast.WaveSize;
             if (progress < RtSettings.AlertProgressPercent / 100f)
             {
                 _progressArmed[index] = true;
@@ -71,16 +71,16 @@ namespace ReinforcementTracker
             bool isPlayer = index == PlayerIndex;
             if (!AlertsWantedFor(isPlayer)) return;
 
-            TextObject text = ProgressText(f, isPlayer, RtSettings.AlertProgressPercent);
-            text.SetTextVariable("COUNT", f.CasualtiesNeeded);
+            TextObject text = ProgressText(forecast, isPlayer, RtSettings.AlertProgressPercent);
+            text.SetTextVariable("COUNT", forecast.CasualtiesNeeded);
             text.SetTextVariable("PERCENT", RtSettings.AlertProgressPercent);
             Show(text, isPlayer);
         }
 
-        private static TextObject ProgressText(SideForecast f, bool isPlayer, int percent)
+        private static TextObject ProgressText(SideForecast forecast, bool isPlayer, int percent)
         {
             bool halfway = percent == 50;
-            if (f.IsHideout)
+            if (forecast.IsHideout)
                 return halfway
                     ? new TextObject("{=rt_al_half_stage2}The bandits are halfway to their second stage ({COUNT} left on the field)")
                     : new TextObject("{=rt_al_pct_stage2}The bandits are {PERCENT}% of the way to their second stage ({COUNT} left on the field)");
@@ -93,16 +93,16 @@ namespace ReinforcementTracker
                 : new TextObject("{=rt_al_pct_enemy}Enemies are {PERCENT}% of the way to getting reinforcements ({COUNT} more casualties)");
         }
 
-        private void CheckHideoutArrival(SideForecast f, int index)
+        private void CheckHideoutArrival(SideForecast forecast, int index)
         {
-            if (!f.IsHideout) return;
+            if (!forecast.IsHideout) return;
             int last = _lastHideoutReserves[index];
-            _lastHideoutReserves[index] = f.Reserves;
-            if (last <= 0 || f.Reserves >= last || f.Status == WaveStatus.Deploying) return;
+            _lastHideoutReserves[index] = forecast.Reserves;
+            if (last <= 0 || forecast.Reserves >= last || forecast.Status == WaveStatus.Deploying) return;
 
-            int arrived = last - f.Reserves;
+            int arrived = last - forecast.Reserves;
             ShowArrival(index == PlayerIndex, arrived, true);
-            Log.Debug($"{(index == PlayerIndex ? "Your side" : "Enemy")}: {arrived} arrived in the hideout ({f.Reserves} still waiting)");
+            Log.Debug($"{(index == PlayerIndex ? "Your side" : "Enemy")}: {arrived} arrived in the hideout ({forecast.Reserves} still waiting)");
         }
 
         private static bool AlertsWantedFor(bool isPlayer) => isPlayer ? RtSettings.AlertsForYourSide : RtSettings.AlertsForEnemy;
