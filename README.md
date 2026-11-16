@@ -72,6 +72,14 @@ None. Mod Configuration Menu v5 (with Harmony, ButterLib and UIExtenderEx) is op
 
 From the `src` folder run `dotnet build -c Release`. The build copies the dll, `SubModule.xml`, `GUI` and `ModuleData` into `Modules\ReinforcementTracker` in the game folder. If the game is installed somewhere else, pass `/p:GameFolder="..."`.
 
+## Releasing
+
+1. Add a `## <version>` section to `CHANGELOG.md`, run `bltools.py bump ReinforcementTracker <version>`, rebuild and push.
+2. Run `bltools.py package ReinforcementTracker` to make `release/ReinforcementTracker-v<version>.zip`.
+3. Publish a GitHub Release tagged `v<version>` with that zip attached. The "Publish to Nexus Mods" workflow then uploads it to Nexus as the new version of the main file, with the changelog section as its changelog. It stops if the tag, `SubModule.xml` and the zip don't have the same version.
+
+The workflow needs the repository secret `NEXUS_API_KEY` (your personal key from Nexus Mods' API keys page).
+
 ## Code overview
 
 | File | What it does |
